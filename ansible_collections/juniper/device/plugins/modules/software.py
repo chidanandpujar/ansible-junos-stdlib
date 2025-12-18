@@ -295,7 +295,7 @@ options:
         value of C(false) and an I(failed) value of C(false) and does not
         attempt to perform the software install.
         Setting the version false bypasses version check and forces
-        The software installation to proceed regardless of the
+        the software installation to proceed regardless of the
         currently installed version
     required: false
     default: Attempt to extract the version from the file name specified by
