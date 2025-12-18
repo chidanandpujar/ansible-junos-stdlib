@@ -294,9 +294,9 @@ options:
         install is not necessary. In this case the module returns a I(changed)
         value of C(false) and an I(failed) value of C(false) and does not
         attempt to perform the software install.
-        Setting version: false bypasses version checking and forces 
-        The software installation to proceed regardless of the 
-        currently installed version.
+        Setting the version false bypasses version check and forces
+        The software installation to proceed regardless of the
+        currently installed version
     required: false
     default: Attempt to extract the version from the file name specified by
              the I(local_package) or I(remote_package) option values IF the
