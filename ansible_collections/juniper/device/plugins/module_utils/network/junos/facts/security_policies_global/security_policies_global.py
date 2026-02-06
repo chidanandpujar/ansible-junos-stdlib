@@ -18,7 +18,6 @@ from copy import deepcopy
 
 from ansible.module_utils._text import to_bytes
 from ansible.module_utils.basic import missing_required_lib
-from ansible.module_utils.six import string_types
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
 from ansible_collections.juniper.device.plugins.module_utils.network.junos.argspec.security_policies_global.security_policies_global import (
@@ -98,7 +97,7 @@ class Security_policies_globalFacts(object):
             data = self._get_device_data(connection, config_filter)
 
         # split the config into instances of the resource
-        if isinstance(data, string_types):
+        if isinstance(data, str):
             data = etree.fromstring(
                 to_bytes(data, errors="surrogate_then_replace"),
             )

@@ -63,7 +63,6 @@ from ansible.module_utils.common.validation import check_type_dict
 
 # Ansible imports
 from ansible.module_utils.connection import Connection
-from ansible.module_utils.six import string_types
 
 
 try:
@@ -1013,7 +1012,7 @@ class JuniperJunosModule(AnsibleModule):
         # Evaluate the string
         kwargs = self.safe_eval(string_val)
 
-        if isinstance(kwargs, string_types):
+        if isinstance(kwargs, str):
             # This might be a keyword1=value1 keyword2=value2 type string.
             # The _check_type_dict method will parse this into a dict for us.
             try:
@@ -1038,7 +1037,7 @@ class JuniperJunosModule(AnsibleModule):
         return_val = []
         for kwarg in kwargs:
             # If it's now a string, see if it can be parsed into a dictionary.
-            if isinstance(kwarg, string_types):
+            if isinstance(kwarg, str):
                 # This might be a keyword1=value1 keyword2=value2 type string.
                 # The _check_type_dict method will parse this into a dict.
                 try:
@@ -1064,7 +1063,7 @@ class JuniperJunosModule(AnsibleModule):
             # is a string or bool.
             return_item = {}
             for k, v in kwarg.items():
-                if not isinstance(k, string_types):
+                if not isinstance(k, str):
                     self.fail_json(
                         msg="The value of the %s option (%s) "
                         "is invalid. Unable to translate into "
@@ -1106,7 +1105,7 @@ class JuniperJunosModule(AnsibleModule):
                 if bool_val is not None:
                     return bool_val
             except TypeError:
-                if isinstance(ignore_warn_list[0], string_types):
+                if isinstance(ignore_warn_list[0], str):
                     return ignore_warn_list[0]
             self.fail_json(
                 msg="The value of the ignore_warning option "
@@ -1115,7 +1114,7 @@ class JuniperJunosModule(AnsibleModule):
             )
         elif len(ignore_warn_list) > 1:
             for ignore_warn in ignore_warn_list:
-                if not isinstance(ignore_warn, string_types):
+                if not isinstance(ignore_warn, str):
                     self.fail_json(
                         msg="The value of the ignore_warning "
                         "option (%s) is invalid. "
@@ -1148,7 +1147,7 @@ class JuniperJunosModule(AnsibleModule):
         rollback = self.params.get("rollback")
         if rollback is None or rollback == "rescue":
             return rollback
-        if isinstance(rollback, string_types):
+        if isinstance(rollback, str):
             try:
                 # Is it an int between 0 and 49?
                 int_val = int(rollback)

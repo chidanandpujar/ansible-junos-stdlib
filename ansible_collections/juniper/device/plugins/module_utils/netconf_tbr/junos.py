@@ -43,7 +43,6 @@ import json
 import re
 from .exceptions import AnsibleConnectionFailure
 from ansible.module_utils._text import to_native, to_text
-from ansible.module_utils.six import string_types
 
 try:
     from ansible_collections.ansible.netcommon.plugins.plugin_utils.netconf_base import (
@@ -215,7 +214,7 @@ class Netconf(NetconfBase):
         :return: Received rpc response from remote host in string format
         """
         if filter is not None:
-            if not isinstance(filter, string_types):
+            if not isinstance(filter, str):
                 raise AnsibleConnectionFailure(
                     "get configuration filter should be of type string,"
                     " received value '%s' is of type '%s'" % (filter, type(filter)),

@@ -18,7 +18,6 @@ from copy import deepcopy
 
 from ansible.module_utils._text import to_bytes
 from ansible.module_utils.basic import missing_required_lib
-from ansible.module_utils.six import iteritems, string_types
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
 from ansible_collections.juniper.device.plugins.module_utils.network.junos.argspec.l3_interfaces.l3_interfaces import (
@@ -96,7 +95,7 @@ class L3_interfacesFacts(object):
             data = self.get_config(connection, config_filter)
         data_string = etree.tostring(data, pretty_print=True).decode()
 
-        if isinstance(data, string_types):
+        if isinstance(data, str):
             data = etree.fromstring(
                 to_bytes(data, errors="surrogate_then_replace"),
             )
@@ -145,7 +144,7 @@ class L3_interfacesFacts(object):
                 inet = unit["family"].get("inet")
                 if inet is not None and "address" in inet.keys():
                     if isinstance(inet["address"], dict):
-                        for key, value in iteritems(inet["address"]):
+                        for key, value in inet["address"].items():
                             addr = {}
                             addr["address"] = value
                             ipv4.append(addr)

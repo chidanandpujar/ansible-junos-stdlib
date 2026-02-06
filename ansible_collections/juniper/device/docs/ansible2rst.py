@@ -32,7 +32,6 @@ import yaml
 
 from ansible.errors import AnsibleError
 from ansible.module_utils._text import to_bytes
-from ansible.module_utils.six import iteritems, string_types
 from ansible.parsing.plugin_docs import read_docstring
 from ansible.parsing.yaml.loader import AnsibleLoader
 from ansible.plugins.loader import fragment_loader
@@ -206,7 +205,7 @@ def add_fragments(doc, filename):
 
     fragments = doc.get("extends_documentation_fragment", [])
 
-    if isinstance(fragments, string_types):
+    if isinstance(fragments, str):
         fragments = [fragments]
 
     # Allow the module to specify a var other than DOCUMENTATION
@@ -243,7 +242,7 @@ def add_fragments(doc, filename):
                 % (fragment_name, filename),
             )
 
-        for key, value in iteritems(fragment):
+        for key, value in fragment.items():
             if key in doc:
                 # assumes both structures have same type
                 if isinstance(doc[key], MutableMapping):
@@ -320,7 +319,7 @@ def process_module(fname, template, outputname, aliases=None):
 
     option_names = []
     if "options" in doc and doc["options"]:
-        for k, v in iteritems(doc["options"]):
+        for k, v in doc["options"].items():
             # Error out if there's no description
             if "description" not in doc["options"][k]:
                 raise AnsibleError(
@@ -353,7 +352,7 @@ def process_module(fname, template, outputname, aliases=None):
 
     connection_option_names = []
     if "connection_options" in doc and doc["connection_options"]:
-        for k, v in iteritems(doc["connection_options"]):
+        for k, v in doc["connection_options"].items():
             # Error out if there's no description
             if "description" not in doc["connection_options"][k]:
                 raise AnsibleError(
@@ -388,7 +387,7 @@ def process_module(fname, template, outputname, aliases=None):
 
     logging_option_names = []
     if "logging_options" in doc and doc["logging_options"]:
-        for k, v in iteritems(doc["logging_options"]):
+        for k, v in doc["logging_options"].items():
             # Error out if there's no description
             if "description" not in doc["logging_options"][k]:
                 raise AnsibleError(
@@ -446,7 +445,7 @@ def process_module(fname, template, outputname, aliases=None):
         doc["returndocs_keys"] = None
 
     doc["author"] = doc.get("author", ["UNKNOWN"])
-    if isinstance(doc["author"], string_types):
+    if isinstance(doc["author"], str):
         doc["author"] = [doc["author"]]
 
     # here is where we build the table of contents...

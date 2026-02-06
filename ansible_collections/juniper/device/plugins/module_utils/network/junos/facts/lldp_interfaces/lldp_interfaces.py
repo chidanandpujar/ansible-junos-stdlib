@@ -17,7 +17,6 @@ __metaclass__ = type
 from copy import deepcopy
 
 from ansible.module_utils._text import to_bytes
-from ansible.module_utils.six import string_types
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
 from ansible_collections.juniper.device.plugins.module_utils.network.junos.argspec.lldp_interfaces.lldp_interfaces import (
@@ -74,7 +73,7 @@ class Lldp_interfacesFacts(object):
                 """
             data = get_resource_config(connection, config_filter=config_filter)
 
-        if isinstance(data, string_types):
+        if isinstance(data, str):
             data = etree.fromstring(
                 to_bytes(data, errors="surrogate_then_replace"),
             )

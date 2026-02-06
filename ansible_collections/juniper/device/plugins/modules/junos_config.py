@@ -281,7 +281,6 @@ import re
 
 from ansible.module_utils._text import to_native, to_text
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.six import string_types
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.netconf import (
     exec_rpc,
 )
@@ -387,7 +386,7 @@ def configure_device(module, warnings, candidate):
                 {"format": config_format, "action": module.params["update"]},
             )
 
-    if isinstance(candidate, string_types):
+    if isinstance(candidate, str):
         candidate = candidate.split("\n")
 
     # this is done to filter out `delete ...` statements which map to

@@ -18,7 +18,6 @@ from copy import deepcopy
 
 from ansible.module_utils._text import to_bytes
 from ansible.module_utils.basic import missing_required_lib
-from ansible.module_utils.six import string_types
 from ansible_collections.ansible.netcommon.plugins.module_utils.network.common import utils
 
 from ansible_collections.juniper.device.plugins.module_utils.network.junos.argspec.security_policies.security_policies import (
@@ -98,7 +97,7 @@ class Security_policiesFacts(object):
             data = self._get_device_data(connection, config_filter)
 
         # split the config into instances of the resource
-        if isinstance(data, string_types):
+        if isinstance(data, str):
             data = etree.fromstring(
                 to_bytes(data, errors="surrogate_then_replace"),
             )
@@ -195,7 +194,7 @@ class Security_policiesFacts(object):
             policy_match = policy["match"]
 
             match["source_address"] = {}
-            if isinstance(policy_match["source-address"], string_types):
+            if isinstance(policy_match["source-address"], str):
                 policy_match["source-address"] = [
                     policy_match["source-address"],
                 ]
@@ -215,7 +214,7 @@ class Security_policiesFacts(object):
                 match["source_address_excluded"] = True
 
             match["destination_address"] = {}
-            if isinstance(policy_match["destination-address"], string_types):
+            if isinstance(policy_match["destination-address"], str):
                 policy_match["destination-address"] = [
                     policy_match["destination-address"],
                 ]
@@ -240,7 +239,7 @@ class Security_policiesFacts(object):
             if policy_match["application"] == "any":
                 match["application"]["any"] = True
             else:
-                if isinstance(policy_match["application"], string_types):
+                if isinstance(policy_match["application"], str):
                     policy_match["application"] = [policy_match["application"]]
                 match["application"]["names"] = policy_match["application"]
 
@@ -250,7 +249,7 @@ class Security_policiesFacts(object):
                 ]
 
             if "source-identity" in policy_match:
-                if isinstance(policy_match["source-identity"], string_types):
+                if isinstance(policy_match["source-identity"], str):
                     policy_match["source-identity"] = [
                         policy_match["source-identity"],
                     ]
@@ -272,7 +271,7 @@ class Security_policiesFacts(object):
                         )
 
             if "url-category" in policy_match:
-                if isinstance(policy_match["url-category"], string_types):
+                if isinstance(policy_match["url-category"], str):
                     policy_match["url-category"] = [
                         policy_match["url-category"],
                     ]
@@ -290,7 +289,7 @@ class Security_policiesFacts(object):
             if "dynamic-application" in policy_match:
                 if isinstance(
                     policy_match["dynamic-application"],
-                    string_types,
+                    str,
                 ):
                     policy_match["dynamic-application"] = [
                         policy_match["dynamic-application"],

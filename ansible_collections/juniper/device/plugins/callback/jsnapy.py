@@ -90,7 +90,6 @@ import json
 import pprint
 
 from ansible import constants as C
-from ansible.module_utils.six import iteritems
 from ansible.plugins.callback import CallbackBase
 
 
@@ -142,13 +141,13 @@ class CallbackModule(CallbackBase):
     def v2_playbook_on_stats(self, stats):
 
         # Go over all results for all hosts
-        for host, results in iteritems(self._results):
+        for host, results in self._results.items():
             has_printed_banner = False
             for result in results:
                 # self._pp.pprint(result.__dict__)
                 res = result._result
                 if res.get("final_result") == "Failed":
-                    for test_name, test_results in iteritems(res["test_results"]):
+                    for test_name, test_results in res["test_results"].items():
                         for testlet in test_results:
                             if ("count" in testlet) and testlet["count"]["fail"] != 0:
                                 if not has_printed_banner:
