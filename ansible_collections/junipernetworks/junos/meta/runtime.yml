@@ -1,7 +1,7 @@
 ---
 # Deprecation: junipernetworks.junos redirects to juniper.device. Redirects will be
 # removed after removal_date; migrate playbooks to use juniper.device FQCNs.
-requires_ansible: ">=2.15.0"
+requires_ansible: ">=2.16.0"
 plugin_routing:
   action:
     junos:
