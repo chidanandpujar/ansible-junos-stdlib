@@ -31,8 +31,8 @@ description:
 version_added: 1.0.0
 deprecated:
   removed_from_collection: junipernetworks.junos
-  removed_at_date: '2027-03-01'
-  why: The junipernetworks.junos collection is deprecated. Redirects will be removed after 2027-03-01.
+  removed_at_date: '2028-04-01'
+  why: The junipernetworks.junos collection is deprecated. Redirects will be removed after 2028-04-01.
   alternative: Use the juniper.device collection instead.
 options:
   config_commands:
