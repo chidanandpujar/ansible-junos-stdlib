@@ -30,7 +30,9 @@ from io import BytesIO, StringIO
 from unittest import TestCase
 
 from ansible.module_utils._text import to_bytes
-from ansible.module_utils.six import PY3
+
+
+PY3 = sys.version_info[0] == 3
 
 
 @contextmanager

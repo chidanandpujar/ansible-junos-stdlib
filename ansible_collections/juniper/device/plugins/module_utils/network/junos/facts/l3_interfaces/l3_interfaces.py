@@ -137,6 +137,15 @@ class L3_interfacesFacts(object):
         interface = {}
         ipv4 = []
         ipv6 = []
+        family = unit.get("family") or {}
+        has_l3_family = isinstance(family, dict) and (
+            "inet" in family or "inet6" in family
+        )
+        # Identity keys must be set for any l3-relevant unit, including
+        # description-only / vlan-id-only units that carry no <family>.
+        if "description" in unit or "vlan-id" in unit or has_l3_family:
+            interface["name"] = int_dict["name"]
+            interface["unit"] = unit["name"]
         if "vlan-tagging" in int_dict:
             interface["vlan_tagging"] = True
         if "description" in unit:
@@ -145,8 +154,6 @@ class L3_interfacesFacts(object):
             interface["vlan_id"] = int(unit["vlan-id"])
         if "family" in unit.keys():
             if "inet" in unit["family"].keys():
-                interface["name"] = int_dict["name"]
-                interface["unit"] = unit["name"]
                 inet = unit["family"].get("inet")
                 if inet is not None and "address" in inet.keys():
                     if isinstance(inet["address"], dict):
@@ -155,8 +162,6 @@ class L3_interfacesFacts(object):
                         for ip in inet["address"]:
                             ipv4.append(self._render_ip_address(ip))
             if "inet" in unit["family"]:
-                interface["name"] = int_dict["name"]
-                interface["unit"] = unit["name"]
                 inet = unit["family"].get("inet")
                 if inet:
                     if inet.get("mtu"):
@@ -166,9 +171,6 @@ class L3_interfacesFacts(object):
                         ipv4.append({"address": "dhcp"})
 
             if "inet6" in unit["family"]:
-                interface["name"] = int_dict["name"]
-                interface["unit"] = unit["name"]
-
                 inet6 = unit["family"].get("inet6")
                 if inet6:
                     if inet6.get("mtu"):

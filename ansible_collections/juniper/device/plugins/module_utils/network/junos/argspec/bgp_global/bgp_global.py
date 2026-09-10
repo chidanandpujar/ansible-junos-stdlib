@@ -448,7 +448,12 @@ class Bgp_globalArgs(object):  # pylint: disable=R0903
                             },
                             "type": "dict",
                         },
+                        "inactive": {"type": "bool"},
                         "name": {"type": "str"},
+                        "apply_groups": {
+                            "elements": "str",
+                            "type": "list",
+                        },
                         "neighbors": {
                             "elements": "dict",
                             "options": {
@@ -721,7 +726,12 @@ class Bgp_globalArgs(object):  # pylint: disable=R0903
                                     },
                                     "type": "dict",
                                 },
+                                "inactive": {"type": "bool"},
                                 "neighbor_address": {"type": "str"},
+                                "apply_groups": {
+                                    "elements": "str",
+                                    "type": "list",
+                                },
                                 "no_advertise_peer_as": {"type": "bool"},
                                 "no_aggregator_id": {"type": "bool"},
                                 "no_client_reflect": {"type": "bool"},

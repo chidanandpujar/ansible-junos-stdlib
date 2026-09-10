@@ -109,6 +109,9 @@ options:
           description:
             description: Specify logical interface description.
             type: str
+          enabled:
+            description: Administrative state of the logical interface unit.
+            type: bool
           vlan_id:
             description: Specify VLAN ID for the logical interface.
             type: int

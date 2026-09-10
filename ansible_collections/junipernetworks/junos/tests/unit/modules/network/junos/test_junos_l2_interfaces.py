@@ -115,8 +115,6 @@ class TestJunosL2InterfacesModule(TestJunosModule):
         """
         set_module_args(dict(state="gathered"))
         result = self.execute_module(changed=False)
-        with open("gathered_outout.py", "w") as file:
-            file.write(str(result["gathered"]))
         gather_list = [
             {"access": {"vlan": "vlan100"}, "name": "ge-0/0/1", "unit": 0, "enhanced_layer": True},
             {

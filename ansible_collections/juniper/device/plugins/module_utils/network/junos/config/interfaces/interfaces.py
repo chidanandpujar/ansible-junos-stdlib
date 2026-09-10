@@ -238,6 +238,11 @@ class Interfaces(ConfigBase):
                 for unit in units:
                     unit_node = build_child_xml_node(intf, "unit")
                     build_child_xml_node(unit_node, "name", str(unit["name"]))
+                    if unit.get("enabled") is not None:
+                        build_child_xml_node(
+                            unit_node,
+                            "enable" if unit["enabled"] else "disable",
+                        )
                     if unit.get("description"):
                         build_child_xml_node(unit_node, "description", unit["description"])
                     if unit.get("vlan_id") is not None:
@@ -361,6 +366,23 @@ class Interfaces(ConfigBase):
                             build_child_xml_node(
                                 unit_node,
                                 "vlan-id",
+                                None,
+                                {"delete": "delete"},
+                            )
+                        # Unlike the interface-level case (which only removes
+                        # <disable/>), a unit deletes whichever admin-state tag
+                        # it currently carries so both enable and disable clear.
+                        if unit.get("enabled") is True:
+                            build_child_xml_node(
+                                unit_node,
+                                "enable",
+                                None,
+                                {"delete": "delete"},
+                            )
+                        if unit.get("enabled") is False:
+                            build_child_xml_node(
+                                unit_node,
+                                "disable",
                                 None,
                                 {"delete": "delete"},
                             )

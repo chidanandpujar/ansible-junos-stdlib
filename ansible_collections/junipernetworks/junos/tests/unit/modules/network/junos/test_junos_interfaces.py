@@ -111,6 +111,138 @@ class TestJunosInterfacesModule(TestJunosModule):
         result = self.execute_module(changed=True)
         self.assertEqual(sorted(result["commands"]), sorted(commands))
 
+    def test_junos_interfaces_logical_unit_enabled_states(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        name="ae32",
+                        units=[
+                            dict(name=301, enabled=True),
+                            dict(name=302, enabled=False),
+                        ],
+                    ),
+                ],
+                state="rendered",
+            ),
+        )
+        commands = [
+            '<nc:interfaces xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">'
+            "<nc:interface><nc:name>ae32</nc:name><nc:enable/><nc:unit><nc:name>301</nc:name>"
+            "<nc:enable/></nc:unit><nc:unit><nc:name>302</nc:name>"
+            "<nc:disable/></nc:unit></nc:interface></nc:interfaces>",
+        ]
+        result = self.execute_module(changed=False)
+        self.assertEqual(result["rendered"], commands[0])
+
+    def test_junos_interfaces_unit_enabled_merged_idempotent(self):
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        name="ae32",
+                        units=[
+                            dict(name=301, enabled=True),
+                            dict(name=302, enabled=False),
+                        ],
+                    ),
+                ],
+                state="merged",
+            ),
+        )
+        commands = [
+            '<nc:interfaces xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">'
+            "<nc:interface><nc:name>ae32</nc:name><nc:enable/>"
+            "<nc:unit><nc:name>301</nc:name><nc:enable/></nc:unit>"
+            "<nc:unit><nc:name>302</nc:name><nc:disable/></nc:unit>"
+            "</nc:interface></nc:interfaces>",
+        ]
+        result = self.execute_module(changed=False)
+        self.assertEqual(result["commands"], commands)
+        self.assertFalse(result["changed"])
+
+    def test_junos_interfaces_unit_enabled_parsed(self):
+        parsed_str = load_fixture(
+            "junos_interfaces_unit_enabled_config.xml",
+            content="str",
+        )
+        set_module_args(dict(running_config=parsed_str, state="parsed"))
+        # validate_config is mocked to a MagicMock in setUp; make it a passthrough
+        # so the facts parser returns the real rendered config for this test.
+        self.validate_config.side_effect = lambda spec, conf: conf
+        result = self.execute_module(changed=False)
+        self.assertEqual(
+            result["parsed"],
+            [
+                {
+                    "name": "ae32",
+                    "enabled": True,
+                    "vlan_tagging": False,
+                    "units": [
+                        {"name": "301", "enabled": True},
+                        {"name": "302", "enabled": False},
+                    ],
+                },
+            ],
+        )
+
+    def test_junos_interfaces_unit_enabled_deleted(self):
+        # have (fixture) has unit 301 enabled and unit 302 disabled; deleting the
+        # interface must remove whichever admin-state tag each unit carries.
+        # side_effect wins over load_fixtures' get_config.return_value default.
+        # content="str" keeps the shared load_fixture cache holding a string so
+        # the parsed test (which needs a string running_config) is unaffected.
+        self.get_config.side_effect = lambda *a, **k: load_fixture(
+            "junos_interfaces_unit_enabled_config.xml",
+            content="str",
+        )
+        self.validate_config.side_effect = lambda spec, conf: conf
+        set_module_args(dict(config=[dict(name="ae32")], state="deleted"))
+        result = self.execute_module(changed=True)
+        commands = [
+            '<nc:interfaces xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">'
+            "<nc:interface><nc:name>ae32</nc:name>"
+            '<nc:unit><nc:name>301</nc:name><nc:enable delete="delete"/></nc:unit>'
+            '<nc:unit><nc:name>302</nc:name><nc:disable delete="delete"/></nc:unit>'
+            "</nc:interface></nc:interfaces>",
+        ]
+        self.assertEqual(result["commands"], commands)
+
+    def test_junos_interfaces_unit_enabled_replaced(self):
+        # have has unit 301 enabled / 302 disabled; want flips them.
+        self.get_config.side_effect = lambda *a, **k: load_fixture(
+            "junos_interfaces_unit_enabled_config.xml",
+            content="str",
+        )
+        self.validate_config.side_effect = lambda spec, conf: conf
+        set_module_args(
+            dict(
+                config=[
+                    dict(
+                        name="ae32",
+                        units=[
+                            dict(name=301, enabled=False),
+                            dict(name=302, enabled=True),
+                        ],
+                    ),
+                ],
+                state="replaced",
+            ),
+        )
+        result = self.execute_module(changed=True)
+        commands = [
+            '<nc:interfaces xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">'
+            "<nc:interface><nc:name>ae32</nc:name>"
+            '<nc:unit><nc:name>301</nc:name><nc:enable delete="delete"/></nc:unit>'
+            '<nc:unit><nc:name>302</nc:name><nc:disable delete="delete"/></nc:unit>'
+            "</nc:interface>"
+            "<nc:interface><nc:name>ae32</nc:name><nc:enable/>"
+            "<nc:unit><nc:name>301</nc:name><nc:disable/></nc:unit>"
+            "<nc:unit><nc:name>302</nc:name><nc:enable/></nc:unit>"
+            "</nc:interface></nc:interfaces>",
+        ]
+        self.assertEqual(result["commands"], commands)
+
     def test_junos_interfaces_merged_idempotent(self):
         self.get_config.return_value = load_fixture(
             "junos_interfaces_config.xml",
@@ -250,9 +382,11 @@ class TestJunosInterfacesModule(TestJunosModule):
             "<nc:description>This is configured with ansible resource module</nc:description>"
             "<nc:speed>100m</nc:speed>"
             "<nc:mtu>1024</nc:mtu>"
+            "<nc:enable/>"
             "</nc:interface></nc:interfaces>",
         ]
-        self.execute_module(changed=False, commands=commands)
+        result = self.execute_module(changed=False)
+        self.assertEqual(result["rendered"], commands[0])
 
     def test_junos_interfaces_merged_comment_01(self):
         original_set_module_args = set_module_args

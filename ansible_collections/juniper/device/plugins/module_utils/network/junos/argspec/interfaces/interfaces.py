@@ -64,6 +64,7 @@ class InterfacesArgs(object):
                     "options": {
                         "name": {"type": "int"},
                         "description": {"type": "str"},
+                        "enabled": {"type": "bool"},
                         "vlan_id": {"type": "int"},
                     },
                     "type": "list",

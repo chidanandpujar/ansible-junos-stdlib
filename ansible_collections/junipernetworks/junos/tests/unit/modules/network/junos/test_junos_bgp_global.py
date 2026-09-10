@@ -145,6 +145,30 @@ class TestJunosBgp_globalModule(TestJunosModule):
         result = self.execute_module(changed=True)
         self.assertEqual(result["before"], result["after"])
 
+    def test_junos_bgp_global_deleted_neighbor_only(self):
+        set_module_args(
+            dict(
+                config=dict(
+                    groups=[
+                        dict(
+                            name="ANSIBLE_TEST",
+                            neighbors=[dict(neighbor_address="1.1.1.1")],
+                        ),
+                    ],
+                ),
+                state="deleted",
+            ),
+        )
+        commands = [
+            '<nc:protocols xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">'
+            '<nc:bgp><nc:group><nc:name>ANSIBLE_TEST</nc:name>'
+            '<nc:neighbor delete="delete"><nc:name>1.1.1.1</nc:name>'
+            '</nc:neighbor></nc:group></nc:bgp></nc:protocols>',
+            '<nc:routing-options xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"/>',
+        ]
+        result = self.execute_module(changed=True, commands=commands)
+        self.assertEqual(sorted(result["commands"]), sorted(commands))
+
     def test_junos_bgp_global_replaced(self):
         """
         :return:
@@ -303,6 +327,219 @@ class TestJunosBgp_globalModule(TestJunosModule):
         rendered = ""
         result = self.execute_module(changed=False)
         self.assertEqual(sorted(result["rendered"]), sorted(rendered))
+
+    def test_junos_bgp_global_rendered_neighbor_local_as(self):
+        set_module_args(
+            dict(
+                config=dict(
+                    groups=[
+                        dict(
+                            name="ANSIBLE_TEST",
+                            neighbors=[
+                                dict(
+                                    neighbor_address="1.1.1.1",
+                                    peer_as="65101",
+                                    local_as=dict(
+                                        as_num="12345",
+                                        no_prepend_global_as=True,
+                                    ),
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                state="rendered",
+            ),
+        )
+        rendered = (
+            '<nc:protocols xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"><nc:bgp>'
+            "<nc:group><nc:name>ANSIBLE_TEST</nc:name><nc:neighbor><nc:name>1.1.1.1</nc:name>"
+            "<nc:peer-as>65101</nc:peer-as><nc:local-as><nc:as-number>12345</nc:as-number>"
+            "<nc:no-prepend-global-as/></nc:local-as></nc:neighbor></nc:group></nc:bgp></nc:protocols>"
+        )
+        result = self.execute_module(changed=False)
+        self.assertEqual(result["rendered"], rendered)
+
+    def test_junos_bgp_global_rendered_inactive_group_and_neighbor(self):
+        set_module_args(
+            dict(
+                config=dict(
+                    groups=[
+                        dict(
+                            name="ANSIBLE_TEST",
+                            inactive=True,
+                            neighbors=[
+                                dict(
+                                    neighbor_address="1.1.1.1",
+                                    inactive=True,
+                                    peer_as="65101",
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                state="rendered",
+            ),
+        )
+        rendered = (
+            '<nc:protocols xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"><nc:bgp>'
+            '<nc:group inactive="inactive"><nc:name>ANSIBLE_TEST</nc:name>'
+            '<nc:neighbor inactive="inactive"><nc:name>1.1.1.1</nc:name>'
+            '<nc:peer-as>65101</nc:peer-as></nc:neighbor></nc:group>'
+            "</nc:bgp></nc:protocols>"
+        )
+        result = self.execute_module(changed=False)
+        self.assertEqual(result["rendered"], rendered)
+
+    def test_junos_bgp_global_rendered_apply_groups(self):
+        set_module_args(
+            dict(
+                config=dict(
+                    groups=[
+                        dict(
+                            name="TEST",
+                            apply_groups=["BGP_GROUP"],
+                            neighbors=[
+                                dict(
+                                    neighbor_address="10.0.0.1",
+                                    apply_groups=["NB_GLOBAL", "BGP_BASIC"],
+                                    peer_as="65101",
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                state="rendered",
+            ),
+        )
+        rendered = (
+            '<nc:protocols xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"><nc:bgp>'
+            "<nc:group><nc:name>TEST</nc:name><nc:apply-groups>BGP_GROUP</nc:apply-groups>"
+            "<nc:neighbor><nc:name>10.0.0.1</nc:name>"
+            "<nc:apply-groups>NB_GLOBAL</nc:apply-groups>"
+            "<nc:apply-groups>BGP_BASIC</nc:apply-groups>"
+            "<nc:peer-as>65101</nc:peer-as></nc:neighbor></nc:group>"
+            "</nc:bgp></nc:protocols>"
+        )
+        result = self.execute_module(changed=False)
+        self.assertEqual(result["rendered"], rendered)
+
+    def test_junos_bgp_global_merged_apply_groups(self):
+        set_module_args(
+            dict(
+                config=dict(
+                    groups=[
+                        dict(
+                            name="TEST",
+                            apply_groups=["BGP_GROUP"],
+                            neighbors=[
+                                dict(
+                                    neighbor_address="10.0.0.1",
+                                    apply_groups=["NB_GLOBAL", "BGP_BASIC"],
+                                    peer_as="65101",
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                state="merged",
+            ),
+        )
+        commands = [
+            '<nc:protocols xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"><nc:bgp>'
+            "<nc:group><nc:name>TEST</nc:name><nc:apply-groups>BGP_GROUP</nc:apply-groups>"
+            "<nc:neighbor><nc:name>10.0.0.1</nc:name>"
+            "<nc:apply-groups>NB_GLOBAL</nc:apply-groups>"
+            "<nc:apply-groups>BGP_BASIC</nc:apply-groups>"
+            "<nc:peer-as>65101</nc:peer-as></nc:neighbor></nc:group>"
+            "</nc:bgp></nc:protocols>",
+            '<nc:routing-options xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"/>',
+        ]
+        result = self.execute_module(changed=True, commands=commands)
+        self.assertEqual(sorted(result["commands"]), sorted(commands))
+
+    def test_junos_bgp_global_deleted_apply_groups(self):
+        set_module_args(
+            dict(
+                config=dict(
+                    groups=[
+                        dict(
+                            name="TEST",
+                            neighbors=[
+                                dict(
+                                    neighbor_address="10.0.0.1",
+                                    apply_groups=["NB_GLOBAL"],
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                state="deleted",
+            ),
+        )
+        commands = [
+            '<nc:protocols xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"><nc:bgp>'
+            "<nc:group><nc:name>TEST</nc:name><nc:neighbor><nc:name>10.0.0.1</nc:name>"
+            '<nc:apply-groups delete="delete">NB_GLOBAL</nc:apply-groups>'
+            "</nc:neighbor></nc:group></nc:bgp></nc:protocols>",
+            '<nc:routing-options xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"/>',
+        ]
+        result = self.execute_module(changed=True, commands=commands)
+        self.assertEqual(sorted(result["commands"]), sorted(commands))
+
+    def test_junos_bgp_global_parsed_apply_groups(self):
+        parsed_str = """
+            <rpc-reply message-id="urn:uuid:0cadb4e8-5bba-47f4-986e-72906227007f">
+                <configuration>
+                    <protocols>
+                        <bgp>
+                            <group>
+                                <name>TEST</name>
+                                <apply-groups>BGP_GROUP</apply-groups>
+                                <neighbor>
+                                    <name>10.0.0.1</name>
+                                    <apply-groups>NB_GLOBAL</apply-groups>
+                                    <apply-groups>BGP_BASIC</apply-groups>
+                                    <peer-as>65101</peer-as>
+                                </neighbor>
+                            </group>
+                        </bgp>
+                    </protocols>
+                </configuration>
+            </rpc-reply>
+        """
+        set_module_args(dict(running_config=parsed_str, state="parsed"))
+        result = self.execute_module(changed=False)
+        group = result["parsed"]["groups"][0]
+        self.assertEqual(group["apply_groups"], ["BGP_GROUP"])
+        self.assertEqual(
+            group["neighbors"][0]["apply_groups"],
+            ["NB_GLOBAL", "BGP_BASIC"],
+        )
+
+    def test_junos_bgp_global_parsed_inactive_group_and_neighbor(self):
+        parsed_str = """
+            <rpc-reply>
+                <configuration>
+                    <protocols>
+                        <bgp>
+                            <group inactive="inactive">
+                                <name>ANSIBLE_TEST</name>
+                                <neighbor inactive="inactive">
+                                    <name>1.1.1.1</name>
+                                    <peer-as>65101</peer-as>
+                                </neighbor>
+                            </group>
+                        </bgp>
+                    </protocols>
+                </configuration>
+            </rpc-reply>
+        """
+        set_module_args(dict(running_config=parsed_str, state="parsed"))
+        result = self.execute_module(changed=False)
+        group = result["parsed"]["groups"][0]
+        self.assertTrue(group["inactive"])
+        self.assertTrue(group["neighbors"][0]["inactive"])
 
     def test_junos_bgp_global_gathered(self):
         """
