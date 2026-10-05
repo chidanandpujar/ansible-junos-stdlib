@@ -60,7 +60,10 @@
   register: result
   ignore_errors: true
   junipernetworks.junos.junos_rpc:
-    rpc: show-interface-information
+    # show-interface-information is a valid Junos RPC alias on current Junos
+    # versions (returns the same data as get-interface-information), so use a
+    # genuinely unknown rpc name here to exercise the failure path.
+    rpc: totally-bogus-rpc-xyz
 
 - ansible.builtin.assert:
     that:
