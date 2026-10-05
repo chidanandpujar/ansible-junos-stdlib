@@ -74,7 +74,7 @@
                     md5:
                       - key_id: 10
                         key_value: "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER"
-                        start_time: "2023-7-12.03:00:00 +0530"
+                        start_time: "2023-7-12.08:30:00 +0530"
                   priority: 2
             name: so-0/2/0.1
             router_id: "10.200.16.75"
