@@ -15,8 +15,18 @@
         delay: 60
         sleep: 40
 
-    - ansible.netcommon.cli_command:
+    - name: Reset ansible connection
+      meta: reset_connection
+
+    - name: show version
+      ansible.netcommon.cli_command:
         command: show version
+      register: result
+      # the CLI/SSH session can still flap briefly right after the port
+      # reopens while the device finishes booting, so retry past that window
+      until: result is succeeded
+      retries: 5
+      delay: 30
   when: ansible_connection == 'ansible.netcommon.network_cli'
 
 - ansible.builtin.debug: msg="END cli/reboot.yaml on connection={{ ansible_connection }}"
