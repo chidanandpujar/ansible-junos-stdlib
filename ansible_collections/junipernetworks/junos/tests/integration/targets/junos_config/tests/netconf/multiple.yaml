@@ -10,6 +10,7 @@
 
 - name: configure multiple commands
   register: result
+  diff: true
   junipernetworks.junos.junos_config:
     lines:
       - set system host-name {{ inventory_hostname_short }}
