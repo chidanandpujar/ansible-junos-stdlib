@@ -8,6 +8,7 @@
 
 - name: configure single command
   register: result
+  diff: true
   junipernetworks.junos.junos_config:
     lines:
       - set system host-name localhost
@@ -43,6 +44,7 @@
 
 - name: Configure syslog file
   register: result
+  diff: true
   junipernetworks.junos.junos_config:
     lines:
       - set system syslog file test1 any any
@@ -55,6 +57,7 @@
 
 - name: Rollback junos config
   register: result
+  diff: true
   junipernetworks.junos.junos_config:
     rollback: 1
 

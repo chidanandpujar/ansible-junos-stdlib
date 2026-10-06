@@ -37,6 +37,7 @@
 
 - name: configure device with set config
   register: result
+  diff: true
   junipernetworks.junos.junos_config:
     src: basic/config.set
 
@@ -66,6 +67,7 @@
 
 - name: configure device with xml config
   register: result
+  diff: true
   junipernetworks.junos.junos_config:
     src: basic/config.xml
 
