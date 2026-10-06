@@ -4,7 +4,7 @@
 - name: setup
   junipernetworks.junos.junos_config:
     lines:
-      - set system host-name {{ inventory_hostname_short }}
+      - set system host-name {{ inventory_hostname_short | replace('_', '-') }}
 
 - name: configure single command
   register: result
@@ -70,6 +70,6 @@
 - name: teardown
   junipernetworks.junos.junos_config:
     lines:
-      - set system host-name {{ inventory_hostname_short }}
+      - set system host-name {{ inventory_hostname_short | replace('_', '-') }}
 
 - ansible.builtin.debug: msg="END netconf/single.yaml on connection={{ ansible_connection }}"
